@@ -1,4 +1,4 @@
 id,title,start,end,status,setup_minutes,teardown_minutes,item_id,quantity
 gala,Community gala,2026-11-21T18:00:00+00:00,2026-11-21T23:00:00+00:00,confirmed,90,60,speaker,3
-gala,Community gala,2026-11-21T18:00:00+00:00,2026-11-21T23:00:00+00:00,confirmed,90,60,microphone,2
+gala,,,,,,,microphone,2
 meeting,Student meeting,2026-11-21T19:00:00+00:00,2026-11-21T20:00:00+00:00,tentative,30,30,speaker,2
