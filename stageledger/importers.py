@@ -44,12 +44,21 @@ EVENT_COLUMNS = ("id", "title", "start", "end", "status",
 
 
 def read_events_csv(path):
-    """Read one CSV row per event/item requirement, grouping by stable event ID.
+    """Read event/item rows from CSV, accepting blank metadata on later rows.
 
-    All non-item fields must be identical within an event. This deliberately
-    rejects ambiguous spreadsheet edits instead of silently taking the last row.
+    The first row of each event must define the title and time interval. Later
+    rows with the same ID can leave these fields blank, or repeat their original
+    values. An explicitly conflicting value is rejected rather than overwritten.
     """
     from stageledger.core import InputError
+
+    def non_negative_minutes(value, line, field):
+        if not value.isascii() or not value.isdecimal():
+            raise InputError(
+                f"Events CSV line {line}: {field} must be a non-negative integer"
+            )
+        return int(value)
+
     try:
         with Path(path).open(encoding="utf-8-sig", newline="") as handle:
             reader = csv.DictReader(handle)
@@ -60,42 +69,72 @@ def read_events_csv(path):
                 raise InputError("Events CSV contains duplicate columns")
             missing = {"id", "title", "start", "end", "item_id", "quantity"} - set(headers)
             if missing:
-                raise InputError("Events CSV missing columns: " + ", ".join(sorted(missing)))
+                raise InputError(
+                    "Events CSV missing columns: " + ", ".join(sorted(missing))
+                )
+
             events = {}
             for line, row in enumerate(reader, 2):
                 if None in row:
                     raise InputError(f"Events CSV line {line}: too many columns")
-                cells = {key.strip(): str(value or "").strip() for key, value in row.items()}
+                cells = {
+                    key.strip(): str(value or "").strip()
+                    for key, value in row.items()
+                }
                 if not any(cells.values()):
                     continue
+
                 event_id = cells["id"]
                 if not event_id:
                     raise InputError(f"Events CSV line {line}: missing id")
-                metadata = {
-                    "id": event_id, "title": cells["title"],
-                    "start": cells["start"], "end": cells["end"],
-                    "status": cells.get("status") or "confirmed",
-                }
-                for key in ("setup_minutes", "teardown_minutes"):
-                    number = cells.get(key, "") or "0"
-                    if not number.isascii() or not number.isdecimal():
-                        raise InputError(f"Events CSV line {line}: {key} must be a non-negative integer")
-                    metadata[key] = int(number)
+
                 if event_id not in events:
+                    # Require the booking identity and schedule once per event,
+                    # not for every equipment line.
+                    for field in ("title", "start", "end"):
+                        if not cells[field]:
+                            raise InputError(
+                                f"Events CSV line {line}: first row for event "
+                                f"'{event_id}' requires {field}"
+                            )
+                    metadata = {
+                        "id": event_id,
+                        "title": cells["title"],
+                        "start": cells["start"],
+                        "end": cells["end"],
+                        "status": cells.get("status") or "confirmed",
+                    }
+                    for field in ("setup_minutes", "teardown_minutes"):
+                        minutes = cells.get(field, "") or "0"
+                        metadata[field] = non_negative_minutes(minutes, line, field)
                     events[event_id] = dict(metadata, requirements=[])
                 else:
-                    for key in EVENT_COLUMNS:
-                        if events[event_id][key] != metadata[key]:
+                    saved = events[event_id]
+                    # Empty repeated metadata means "same as first row".
+                    # Non-empty values must agree; never allow a silent override.
+                    for field in EVENT_COLUMNS[1:]:
+                        value = cells.get(field, "")
+                        if not value:
+                            continue
+                        if field in ("setup_minutes", "teardown_minutes"):
+                            value = non_negative_minutes(value, line, field)
+                        if value != saved[field]:
                             raise InputError(
-                                f"Events CSV line {line}: inconsistent {key} for event '{event_id}'"
+                                f"Events CSV line {line}: inconsistent {field} "
+                                f"for event '{event_id}'"
                             )
+
                 item_id, quantity = cells["item_id"], cells["quantity"]
                 if not item_id and not quantity:
-                    continue  # Event with no equipment requirements
-                if not item_id or not quantity or not quantity.isascii() or not quantity.isdecimal():
-                    raise InputError(f"Events CSV line {line}: invalid item_id/quantity")
+                    continue  # Valid event with no equipment requirements
+                if (not item_id or not quantity or not quantity.isascii()
+                        or not quantity.isdecimal()):
+                    raise InputError(
+                        f"Events CSV line {line}: invalid item_id/quantity"
+                    )
                 events[event_id]["requirements"].append({
-                    "item_id": item_id, "quantity": int(quantity)
+                    "item_id": item_id,
+                    "quantity": int(quantity),
                 })
             return {"events": list(events.values())}
     except (OSError, UnicodeError, csv.Error) as exc:
