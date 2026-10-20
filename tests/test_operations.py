@@ -191,6 +191,19 @@ class OperationsTests(unittest.TestCase):
         self.assertEqual(status, 2)
         self.assertIn("Equipment planning", out.read_text(encoding="utf-8"))
 
+    def test_html_checkboxes_are_interactive(self):
+        html = render_html([self.plan()])
+        self.assertIn('type="checkbox"', html)
+        self.assertIn('aria-label="Pack PA speaker"', html)
+
+    def test_csv_formula_injection_is_escaped(self):
+        from stageledger.cli import as_csv
+        self.events["events"][0]["title"] = "=2+2"
+        self.inv["items"][0]["name"] = "=HYPERLINK(\"https://example.org\")"
+        self.save()
+        csv_report = as_csv(self.plan())
+        self.assertIn("'=HYPERLINK(", csv_report)
+
     def test_audit_html_excludes_cancelled_events(self):
         self.events["events"][1]["status"] = "cancelled"
         self.save()

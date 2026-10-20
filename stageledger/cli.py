@@ -9,6 +9,14 @@ from stageledger.core import InputError, audit, build_plan, load_events, load_in
 from stageledger.reporting import render_html
 
 
+def _csv_safe(value):
+    """Prevent spreadsheet programs from interpreting user-supplied cells as formulas."""
+    text = str(value)
+    if text.lstrip().startswith(("=", "+", "-", "@")) or text.startswith(("\t", "\r", "\n")):
+        return "'" + text
+    return text
+
+
 def as_markdown(plan):
     status = "READY" if plan["ready"] else "SHORTAGES FOUND"
     lines = [
@@ -43,7 +51,7 @@ def as_csv(plan):
     writer.writerow(["event_id", "item_id", "name", "requested", "available", "shortage"])
     for item in plan["items"]:
         writer.writerow([
-            plan["event"], item["id"], item["name"], item["requested"],
+            _csv_safe(plan["event"]), _csv_safe(item["id"]), _csv_safe(item["name"]), item["requested"],
             item["available"], item["shortage"],
         ])
     return buffer.getvalue()

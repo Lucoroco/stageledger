@@ -18,7 +18,7 @@ def render_html(plans):
             status = '<span class="chip danger">Shortage</span>' if missing else '<span class="chip good">Available</span>'
             conflicts = ", ".join(item["overlapping_events"]) or "None"
             rows.append(
-                "<tr><td><span class='tick'>□</span></td>"
+                f'<tr><td><input type="checkbox" aria-label="Pack {_safe(item["name"])}"></td>'
                 f"<td><strong>{_safe(item['name'])}</strong><small>{_safe(item['category'])} · {_safe(item['id'])}</small></td>"
                 f"<td>{item['requested']}</td><td>{item['available']}</td>"
                 f"<td><strong>{missing}</strong></td><td>{status}<small>Overlaps: {_safe(conflicts)}</small></td></tr>"
@@ -65,7 +65,7 @@ def render_html(plans):
     th{text-align:left;background:#f5f8fb;font-size:11px;color:#536a7f;text-transform:uppercase;letter-spacing:.055em;padding:13px 18px}
     td{border-top:1px solid #e8eef3;padding:15px 18px;font-size:13px;vertical-align:middle}
     td small{display:block;color:#698092;font-size:11px;margin-top:5px}
-    .tick{font-size:22px;color:#718294}.empty{text-align:center;color:#728295}
+    input[type=checkbox]{width:19px;height:19px;accent-color:#197b68;cursor:pointer}.empty{text-align:center;color:#728295}
     footer{color:#738395;font-size:12px;line-height:1.65;margin-top:30px}
     @media(max-width:760px){.summary{grid-template-columns:1fr}.meta{grid-template-columns:1fr 1fr}.event-head{align-items:flex-start;flex-direction:column}}
     @media print{ :root{background:white}main{max-width:none;padding:0}.actions{display:none}.event{box-shadow:none;border:1px solid #bbb}.stat{border:1px solid #bbb}th{-webkit-print-color-adjust:exact;print-color-adjust:exact} }
@@ -77,7 +77,7 @@ def render_html(plans):
         f'<style>{style}</style></head><body><main>'
         '<header class="top"><div><div class="brand">StageLedger / Field operations</div>'
         '<h1>Equipment planning</h1>'
-        '<p class="sub">Print-ready lists and booking conflict checks for community events.</p></div>'
+        '<p class="sub">Print-ready lists and booking conflict checks for community events. Tick packed items before printing; checkmarks are not saved automatically.</p></div>'
         '<div class="actions"><button class="print" onclick="window.print()">Print / Save PDF</button></div></header>'
         f'<div class="summary"><div class="stat"><b>{total}</b><span>Active events</span></div>'
         f'<div class="stat"><b>{total-shortages}</b><span>Plans with enough equipment</span></div>'
