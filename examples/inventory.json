@@ -1,0 +1,8 @@
+{
+  "items": [
+    {"id": "speaker", "name": "Main PA speaker", "quantity": 4, "category": "Audio"},
+    {"id": "microphone", "name": "Handheld microphone", "quantity": 6, "category": "Audio"},
+    {"id": "ledbar", "name": "LED light bar", "quantity": 8, "category": "Lighting"},
+    {"id": "stand", "name": "Speaker stand", "quantity": 4, "category": "Rigging"}
+  ]
+}

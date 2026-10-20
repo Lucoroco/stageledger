@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stageledger"
+version = "0.1.0"
+description = "Open-source equipment packing and booking-conflict checks for small events."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{name = "StageLedger contributors"}]
+keywords = ["events", "inventory", "audio", "equipment", "open-source"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+  "Topic :: Office/Business :: Scheduling"
+]
+
+[project.scripts]
+stageledger = "stageledger.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["stageledger*"]

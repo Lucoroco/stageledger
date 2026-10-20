@@ -1,0 +1,25 @@
+{
+  "events": [
+    {
+      "id": "community-concert",
+      "title": "Community concert",
+      "start": "2026-11-21T18:00:00+00:00",
+      "end": "2026-11-21T23:30:00+00:00",
+      "requirements": [
+        {"item_id": "speaker", "quantity": 3},
+        {"item_id": "microphone", "quantity": 4},
+        {"item_id": "ledbar", "quantity": 6}
+      ]
+    },
+    {
+      "id": "club-meeting",
+      "title": "Club meeting",
+      "start": "2026-11-21T20:00:00+00:00",
+      "end": "2026-11-21T22:00:00+00:00",
+      "requirements": [
+        {"item_id": "speaker", "quantity": 2},
+        {"item_id": "microphone", "quantity": 1}
+      ]
+    }
+  ]
+}
