@@ -1,17 +1,18 @@
 # StageLedger
 
-[![Python tests](https://github.com/Lucoroco/stageledger/actions/workflows/tests.yml/badge.svg)](https://github.com/Lucoroco/stageledger/actions/workflows/tests.yml)
+[![Python tests](https://github.com/Lucoroco/stageledger/actions/workflows/tests.yml/badge.svg)](https://github.com/Lucoroco/stageledger/actions/workflows/tests.yml) [![Browser and parity tests](https://github.com/Lucoroco/stageledger/actions/workflows/browser-tests.yml/badge.svg)](https://github.com/Lucoroco/stageledger/actions/workflows/browser-tests.yml)
 
 **Open-source equipment booking and event packing for associations, student societies and small AV teams.**
 
 StageLedger coordinates speakers, microphones, lighting and cables across overlapping events. It validates local data, flags equipment shortages and exports printable checklists — **offline**, without accounts, a server, telemetry or paid dependencies.
 
-> **Status:** v0.2 development prototype. Source and tests are public; independent users, downloads and third-party contributors are **not yet verified**. The association examples are fictional demos.
+> **Status:** v0.3 public prototype with an offline browser dashboard and Python CLI. The source and tests are verifiable; independent adoption and external contributors are **not yet verified**. All provided association examples are fictional demonstrations.
 
 ## Features
 
 | Feature | Benefit |
 | --- | --- |
+| Browser interface | Add equipment, edit bookings and download reports with no Python commands |
 | Equipment inventory | Track pooled quantities by item type |
 | CSV and JSON input | Export equipment from a spreadsheet or use JSON |
 | Booking conflicts | Compare peak simultaneous demand across events |
@@ -21,7 +22,17 @@ StageLedger coordinates speakers, microphones, lighting and cables across overla
 | Schedule audit | Analyse all non-cancelled events at once |
 | Validation | Clear errors for duplicate IDs, quantities and timestamps |
 
-## Quick start (Python 3.10+)
+## Easiest start: browser dashboard (no installation)
+
+1. [Download the source ZIP](https://github.com/Lucoroco/stageledger/archive/refs/heads/main.zip) and extract it.
+2. Open **`web/index.html`** in your browser, keeping the other files in `web/` next to it.
+3. Browse the **fictional demo**, then add your own equipment or import a spreadsheet CSV.
+4. Add bookings with setup/teardown buffers. View shortage warnings and generate packing reports.
+5. Export your inventory and events as JSON **before closing or refreshing**. There is no automatic save or cloud sync.
+
+**No server, account or Python install is needed for the browser dashboard.** Full details: [browser user guide](web/README.md). The browser inputs use your device's local timezone and save dates as UTC. If you need unattended integrations or scripts, use the Python CLI below.
+
+## Command-line quick start (Python 3.10+)
 
 [Download ZIP](https://github.com/Lucoroco/stageledger/archive/refs/heads/main.zip), extract it and open a terminal in the project directory. Alternatively clone the repository.
 
@@ -99,6 +110,7 @@ The speaker stock for this event is reserved **17:00–20:30 UTC**, including pr
 - Quantities are pooled per item type, not tracked by serial number.
 - Equipment condition, staff, travel routing, supplier orders and deposits are not managed.
 - Transport time needs to be included in setup/teardown buffers.
+- Browser dashboard data stays in memory until explicitly exported; a reload discards unsaved edits.
 - HTML reports are local exports, not a hosted booking service.
 - Do not expose personal information or real client schedules in public GitHub issues.
 
@@ -106,6 +118,7 @@ See the [operations guide](docs/OPERATIONS_GUIDE.md) for workflows and validatio
 
 ## Community and development
 
+- [Browser dashboard](web/index.html) and [browser guide](web/README.md)
 - [Roadmap](docs/ROADMAP.md) and [changelog](CHANGELOG.md)
 - [Open issues and feature requests](https://github.com/Lucoroco/stageledger/issues)
 - [Contributing instructions](CONTRIBUTING.md)
