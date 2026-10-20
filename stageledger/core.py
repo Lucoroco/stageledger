@@ -1,8 +1,10 @@
 """Validated inventory, event scheduling, and equipment shortage calculations."""
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import json
+
+from stageledger.importers import read_inventory_csv
 
 
 class InputError(ValueError):
@@ -42,7 +44,7 @@ def _json(path):
 
 def load_inventory(path):
     """Return inventory indexed by unique item IDs."""
-    raw = _json(path)
+    raw = read_inventory_csv(path) if Path(path).suffix.lower() == ".csv" else _json(path)
     if not isinstance(raw, dict) or not isinstance(raw.get("items"), list):
         raise InputError("inventory JSON must contain an 'items' array")
     items = {}
@@ -85,6 +87,13 @@ def load_events(path, inventory):
         raw_requirements = event.get("requirements")
         if not isinstance(raw_requirements, list):
             raise InputError(f"{label}.requirements must be an array")
+        status = event.get("status", "confirmed")
+        if status not in ("confirmed", "tentative", "cancelled"):
+            raise InputError(f"{label}.status must be confirmed, tentative or cancelled")
+        setup = _positive_int(event.get("setup_minutes", 0), f"{label}.setup_minutes", allow_zero=True)
+        teardown = _positive_int(event.get("teardown_minutes", 0), f"{label}.teardown_minutes", allow_zero=True)
+        if setup > 43200 or teardown > 43200:
+            raise InputError(f"{label}: setup and teardown must be <= 43200 minutes")
         requirements = {}
         for j, requirement in enumerate(raw_requirements):
             ref = f"{label}.requirements[{j}]"
@@ -101,6 +110,11 @@ def load_events(path, inventory):
             "title": title,
             "start": start,
             "end": end,
+            "booking_start": start - timedelta(minutes=setup),
+            "booking_end": end + timedelta(minutes=teardown),
+            "setup_minutes": setup,
+            "teardown_minutes": teardown,
+            "status": status,
             "requirements": requirements,
         })
     return sorted(events, key=lambda event: (event["start"], event["id"]))
@@ -114,11 +128,11 @@ def _peak_other_demand(event, others, item_id):
     """
     changes = []
     for other in others:
-        if other["id"] == event["id"]:
+        if other["id"] == event["id"] or other["status"] == "cancelled":
             continue
         count = other["requirements"].get(item_id, 0)
-        start = max(event["start"], other["start"])
-        end = min(event["end"], other["end"])
+        start = max(event["booking_start"], other["booking_start"])
+        end = min(event["booking_end"], other["booking_end"])
         if count and start < end:
             changes.extend(((start, count), (end, -count)))
     used, peak = 0, 0
@@ -133,21 +147,37 @@ def build_plan(event_id, inventory, events):
     event = next((item for item in events if item["id"] == event_id), None)
     if event is None:
         raise InputError(f"Unknown event ID: {event_id}")
+    if event["status"] == "cancelled":
+        raise InputError(f"Event '{event_id}' is cancelled and has no active packing list")
     rows = []
     for item_id, requested in sorted(event["requirements"].items()):
         item = inventory[item_id]
         competing = _peak_other_demand(event, events, item_id)
         available = max(0, item["quantity"] - competing)
         shortage = max(0, requested - available)
+        competing_events = sorted(
+            other["id"] for other in events
+            if other["id"] != event_id
+            and other["status"] != "cancelled"
+            and other["requirements"].get(item_id, 0) > 0
+            and event["booking_start"] < other["booking_end"]
+            and other["booking_start"] < event["booking_end"]
+        )
         rows.append({
             "id": item_id, "name": item["name"],
             "category": item["category"], "requested": requested,
             "owned": item["quantity"], "other_bookings_peak": competing,
             "available": available, "shortage": shortage,
+            "overlapping_events": competing_events,
         })
     return {
         "event": event["id"], "title": event["title"],
         "start": event["start"].isoformat(), "end": event["end"].isoformat(),
+        "booking_start": event["booking_start"].isoformat(),
+        "booking_end": event["booking_end"].isoformat(),
+        "setup_minutes": event["setup_minutes"],
+        "teardown_minutes": event["teardown_minutes"],
+        "status": event["status"],
         "ready": all(row["shortage"] == 0 for row in rows),
         "items": rows,
     }
@@ -155,4 +185,5 @@ def build_plan(event_id, inventory, events):
 
 def audit(inventory, events):
     """Return plans for every event, including conflicts between bookings."""
-    return [build_plan(event["id"], inventory, events) for event in events]
+    return [build_plan(event["id"], inventory, events) for event in events
+            if event["status"] != "cancelled"]
