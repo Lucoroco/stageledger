@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import json
 
-from stageledger.importers import read_inventory_csv
+from stageledger.importers import read_inventory_csv, read_events_csv
 
 
 class InputError(ValueError):
@@ -66,7 +66,7 @@ def load_inventory(path):
 
 def load_events(path, inventory):
     """Validate event times and quantities; return events sorted by start."""
-    raw = _json(path)
+    raw = read_events_csv(path) if Path(path).suffix.lower() == ".csv" else _json(path)
     if not isinstance(raw, dict) or not isinstance(raw.get("events"), list):
         raise InputError("events JSON must contain an 'events' array")
     events = []

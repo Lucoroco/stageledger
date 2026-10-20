@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 — 2026-10-20
+
+- Import event schedules directly from CSV files exported from Excel or Google Sheets.
+- Support multiple equipment types per event with strict consistency checks.
+- Include spreadsheet-ready example events and step-by-step CSV documentation.
+- Add tests for grouping, malformed rows, duplicate item requirements and end-to-end HTML export.
+
 ## 0.2.0 — 2026-10-20
 
 - Import inventory from CSV, including UTF-8 BOM and optional category.

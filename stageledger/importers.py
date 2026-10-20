@@ -38,3 +38,65 @@ def read_inventory_csv(path):
             return {"items": items}
     except (OSError, UnicodeError, csv.Error) as exc:
         raise InputError(f"Cannot read CSV inventory {path}: {exc}") from exc
+
+EVENT_COLUMNS = ("id", "title", "start", "end", "status",
+                 "setup_minutes", "teardown_minutes")
+
+
+def read_events_csv(path):
+    """Read one CSV row per event/item requirement, grouping by stable event ID.
+
+    All non-item fields must be identical within an event. This deliberately
+    rejects ambiguous spreadsheet edits instead of silently taking the last row.
+    """
+    from stageledger.core import InputError
+    try:
+        with Path(path).open(encoding="utf-8-sig", newline="") as handle:
+            reader = csv.DictReader(handle)
+            if not reader.fieldnames or any(name is None for name in reader.fieldnames):
+                raise InputError("Events CSV needs a valid header")
+            headers = [name.strip() for name in reader.fieldnames]
+            if len(set(headers)) != len(headers):
+                raise InputError("Events CSV contains duplicate columns")
+            missing = {"id", "title", "start", "end", "item_id", "quantity"} - set(headers)
+            if missing:
+                raise InputError("Events CSV missing columns: " + ", ".join(sorted(missing)))
+            events = {}
+            for line, row in enumerate(reader, 2):
+                if None in row:
+                    raise InputError(f"Events CSV line {line}: too many columns")
+                cells = {key.strip(): str(value or "").strip() for key, value in row.items()}
+                if not any(cells.values()):
+                    continue
+                event_id = cells["id"]
+                if not event_id:
+                    raise InputError(f"Events CSV line {line}: missing id")
+                metadata = {
+                    "id": event_id, "title": cells["title"],
+                    "start": cells["start"], "end": cells["end"],
+                    "status": cells.get("status") or "confirmed",
+                }
+                for key in ("setup_minutes", "teardown_minutes"):
+                    number = cells.get(key, "") or "0"
+                    if not number.isascii() or not number.isdecimal():
+                        raise InputError(f"Events CSV line {line}: {key} must be a non-negative integer")
+                    metadata[key] = int(number)
+                if event_id not in events:
+                    events[event_id] = dict(metadata, requirements=[])
+                else:
+                    for key in EVENT_COLUMNS:
+                        if events[event_id][key] != metadata[key]:
+                            raise InputError(
+                                f"Events CSV line {line}: inconsistent {key} for event '{event_id}'"
+                            )
+                item_id, quantity = cells["item_id"], cells["quantity"]
+                if not item_id and not quantity:
+                    continue  # Event with no equipment requirements
+                if not item_id or not quantity or not quantity.isascii() or not quantity.isdecimal():
+                    raise InputError(f"Events CSV line {line}: invalid item_id/quantity")
+                events[event_id]["requirements"].append({
+                    "item_id": item_id, "quantity": int(quantity)
+                })
+            return {"events": list(events.values())}
+    except (OSError, UnicodeError, csv.Error) as exc:
+        raise InputError(f"Cannot read events CSV {path}: {exc}") from exc

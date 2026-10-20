@@ -6,14 +6,14 @@
 
 StageLedger coordinates speakers, microphones, lighting and cables across overlapping events. It validates local data, flags equipment shortages and exports printable checklists — **offline**, without accounts, a server, telemetry or paid dependencies.
 
-> **Status:** v0.2 development prototype. Source and tests are public; independent users, downloads and third-party contributors are **not yet verified**. The association examples are fictional demos.
+> **Status:** v0.3 development prototype. Source and tests are public; independent users, downloads and third-party contributors are **not yet verified**. The association examples are fictional demos.
 
 ## Features
 
 | Feature | Benefit |
 | --- | --- |
 | Equipment inventory | Track pooled quantities by item type |
-| CSV and JSON input | Export equipment from a spreadsheet or use JSON |
+| CSV and JSON input | Export inventory **and event schedules** from a spreadsheet, or use JSON |
 | Booking conflicts | Compare peak simultaneous demand across events |
 | Setup and teardown | Reserve items before and after each event |
 | Booking statuses | Confirmed, tentative and cancelled events |
@@ -44,6 +44,12 @@ For Windows, see the [PowerShell quick start](docs/QUICKSTART_WINDOWS.md). Optio
 ```bash
 python -m pip install -e .
 stageledger --help
+```
+
+Both the inventory and the event schedule can be entered in CSV, so Excel and Google Sheets users do not need to edit JSON. See the [events CSV guide](docs/EVENTS_CSV.md), including the multi-row booking format. To try it immediately:
+
+```bash
+python -m stageledger audit --inventory examples/inventory.csv --events examples/events.csv --format html --output schedule.html
 ```
 
 ## Data example
