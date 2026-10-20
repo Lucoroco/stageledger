@@ -71,24 +71,46 @@ def read_events_csv(path):
                 event_id = cells["id"]
                 if not event_id:
                     raise InputError(f"Events CSV line {line}: missing id")
-                metadata = {
-                    "id": event_id, "title": cells["title"],
-                    "start": cells["start"], "end": cells["end"],
-                    "status": cells.get("status") or "confirmed",
-                }
-                for key in ("setup_minutes", "teardown_minutes"):
-                    number = cells.get(key, "") or "0"
-                    if not number.isascii() or not number.isdecimal():
-                        raise InputError(f"Events CSV line {line}: {key} must be a non-negative integer")
-                    metadata[key] = int(number)
-                if event_id not in events:
+                first_row = event_id not in events
+                if first_row:
+                    for key in ("title", "start", "end"):
+                        if not cells[key]:
+                            raise InputError(
+                                f"Events CSV line {line}: first row for '{event_id}' needs {key}"
+                            )
+                    metadata = {
+                        "id": event_id, "title": cells["title"],
+                        "start": cells["start"], "end": cells["end"],
+                        "status": cells.get("status") or "confirmed",
+                    }
+                    for key in ("setup_minutes", "teardown_minutes"):
+                        number = cells.get(key, "") or "0"
+                        if not number.isascii() or not number.isdecimal():
+                            raise InputError(
+                                f"Events CSV line {line}: {key} must be a non-negative integer"
+                            )
+                        metadata[key] = int(number)
                     events[event_id] = dict(metadata, requirements=[])
                 else:
-                    for key in EVENT_COLUMNS:
-                        if events[event_id][key] != metadata[key]:
+                    existing = events[event_id]
+                    # Empty cells mean "same as the first row". Explicit values
+                    # must match, including the optional status and buffers.
+                    for key in ("title", "start", "end", "status"):
+                        if cells.get(key) and cells[key] != existing[key]:
                             raise InputError(
                                 f"Events CSV line {line}: inconsistent {key} for event '{event_id}'"
                             )
+                    for key in ("setup_minutes", "teardown_minutes"):
+                        number = cells.get(key, "")
+                        if number:
+                            if not number.isascii() or not number.isdecimal():
+                                raise InputError(
+                                    f"Events CSV line {line}: {key} must be a non-negative integer"
+                                )
+                            if int(number) != existing[key]:
+                                raise InputError(
+                                    f"Events CSV line {line}: inconsistent {key} for event '{event_id}'"
+                                )
                 item_id, quantity = cells["item_id"], cells["quantity"]
                 if not item_id and not quantity:
                     continue  # Event with no equipment requirements

@@ -71,6 +71,50 @@ class EventCSVTests(unittest.TestCase):
         self.events.write_text("\ufeff" + HEADER + ROWS, encoding="utf-8")
         self.assertEqual(len(self.load()[1]), 2)
 
+
+    def test_continuation_row_inherits_booking_fields(self):
+        rows = ROWS.splitlines(True)
+        rows[1] = "gala,,,,,,,mic,1\n"
+        self.events.write_text(HEADER + "".join(rows))
+        stock, events = self.load()
+        gala = build_plan("gala", stock, events)
+        self.assertEqual(len(gala["items"]), 2)
+        self.assertEqual(gala["setup_minutes"], 60)
+        self.assertEqual(gala["teardown_minutes"], 45)
+
+    def test_continuation_row_rejects_changed_start(self):
+        rows = ROWS.splitlines(True)
+        rows[1] = "gala,,2026-11-21T19:00:00Z,,,,,mic,1\n"
+        self.events.write_text(HEADER + "".join(rows))
+        with self.assertRaisesRegex(InputError, "inconsistent start"):
+            self.load()
+
+    def test_continuation_rejects_explicit_default_status(self):
+        rows = ROWS.splitlines(True)
+        rows[1] = "gala,,,,tentative,,,mic,1\n"
+        self.events.write_text(HEADER + "".join(rows))
+        with self.assertRaisesRegex(InputError, "inconsistent status"):
+            self.load()
+
+    def test_continuation_rejects_explicit_different_buffer(self):
+        rows = ROWS.splitlines(True)
+        rows[1] = "gala,,,,,0,,mic,1\n"
+        self.events.write_text(HEADER + "".join(rows))
+        with self.assertRaisesRegex(InputError, "inconsistent setup_minutes"):
+            self.load()
+
+    def test_first_row_must_have_booking_fields(self):
+        self.events.write_text(HEADER + "gala,,,,,,,speaker,2\n")
+        with self.assertRaisesRegex(InputError, "first row"):
+            self.load()
+
+    def test_interleaved_event_continuation(self):
+        rows = ROWS.splitlines(True)
+        self.events.write_text(HEADER + rows[0] + rows[2] +
+                               "gala,,,,,,,mic,1\n")
+        stock, events = self.load()
+        self.assertEqual(len(build_plan("gala", stock, events)["items"]), 2)
+
     def test_cli_end_to_end(self):
         out = self.dir / "plan.html"
         code = main(["plan", "--inventory", str(self.inventory),
