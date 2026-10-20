@@ -5,7 +5,9 @@ This document separates verified engineering facts from future adoption targets.
 ## What can be verified today
 
 - The project source code is publicly accessible in this repository.
-- The CLI accepts local equipment inventory and event JSON.
+- The CLI accepts local inventory and event schedules in CSV or JSON.
+- A local, browser-based interface is available under `web/index.html`, with manual exports and no remote analytics.
+- Native Node tests under `web/tests/` compare browser calculations against the Python CLI for the same example data.
 - Unit tests are provided in `tests/` and can be run with `python -m unittest discover -s tests -v`.
 - GitHub Actions is configured to test supported Python versions on push and pull requests; verify actual runs in the Actions tab.
 - Documentation, sample inputs, licence and contributing instructions are available.
@@ -33,7 +35,9 @@ This document separates verified engineering facts from future adoption targets.
 | Metric | Current evidence | Verification method |
 | --- | --- | --- |
 | Public source | GitHub repository | Open this repository |
-| Runnable automated tests | `tests/` | Run command above / inspect CI |
+| Python automated tests | `tests/` | Run command above / inspect CI |
+| Browser calculations + parity tests | `web/tests/` | Run `node --test web/tests/*.test.cjs` / inspect CI |
+| Offline web editor | `web/index.html` | Download repository ZIP and open locally |
 | External users | Not verified | Independent user confirmation |
 | Monthly package downloads | Not published / not verified | Registry dashboard |
 | External merged PR contributors | Not verified | GitHub merged-PR history |

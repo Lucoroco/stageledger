@@ -1,17 +1,18 @@
 # StageLedger
 
-[![Python tests](https://github.com/Lucoroco/stageledger/actions/workflows/tests.yml/badge.svg)](https://github.com/Lucoroco/stageledger/actions/workflows/tests.yml)
+[![Python tests](https://github.com/Lucoroco/stageledger/actions/workflows/tests.yml/badge.svg)](https://github.com/Lucoroco/stageledger/actions/workflows/tests.yml) [![Browser and parity tests](https://github.com/Lucoroco/stageledger/actions/workflows/browser-tests.yml/badge.svg)](https://github.com/Lucoroco/stageledger/actions/workflows/browser-tests.yml)
 
 **Open-source equipment booking and event packing for associations, student societies and small AV teams.**
 
 StageLedger coordinates speakers, microphones, lighting and cables across overlapping events. It validates local data, flags equipment shortages and exports printable checklists — **offline**, without accounts, a server, telemetry or paid dependencies.
 
-> **Status:** v0.3 development prototype. Source and tests are public; independent users, downloads and third-party contributors are **not yet verified**. The association examples are fictional demos.
+> **Status:** v0.4 open-source prototype. Both the browser interface and command-line program are publicly testable; independent adoption and outside contributors are **not yet verified**. All provided association scenarios are fictional demos.
 
 ## Features
 
 | Feature | Benefit |
 | --- | --- |
+| Local browser dashboard | Edit inventory and bookings with forms, see live warnings and export files |
 | Equipment inventory | Track pooled quantities by item type |
 | CSV and JSON input | Export inventory **and event schedules** from a spreadsheet, or use JSON |
 | Booking conflicts | Compare peak simultaneous demand across events |
@@ -21,7 +22,16 @@ StageLedger coordinates speakers, microphones, lighting and cables across overla
 | Schedule audit | Analyse all non-cancelled events at once |
 | Validation | Clear errors for duplicate IDs, quantities and timestamps |
 
-## Quick start (Python 3.10+)
+## Try the browser dashboard — no Python installation
+
+1. [Download the repository ZIP](https://github.com/Lucoroco/stageledger/archive/refs/heads/main.zip) and extract it.
+2. Double-click **`web/index.html`**, keeping the companion files in the `web/` folder.
+3. Try the clearly marked **fictional demonstration**, or import an inventory CSV/JSON and add your events through forms.
+4. Check equipment shortages, generate HTML packing reports and export JSON backups.
+
+**Important:** editing happens in memory, not in the cloud. Export your files before closing or refreshing the tab. For browser usage and privacy, read [the dashboard guide](web/README.md).
+
+## Command-line quick start (Python 3.10+)
 
 [Download ZIP](https://github.com/Lucoroco/stageledger/archive/refs/heads/main.zip), extract it and open a terminal in the project directory. Alternatively clone the repository.
 
@@ -105,6 +115,7 @@ The speaker stock for this event is reserved **17:00–20:30 UTC**, including pr
 - Quantities are pooled per item type, not tracked by serial number.
 - Equipment condition, staff, travel routing, supplier orders and deposits are not managed.
 - Transport time needs to be included in setup/teardown buffers.
+- The browser dashboard uses only local scripts. Changes are not persisted automatically; export backups before refreshing.
 - HTML reports are local exports, not a hosted booking service.
 - Do not expose personal information or real client schedules in public GitHub issues.
 
@@ -112,6 +123,7 @@ See the [operations guide](docs/OPERATIONS_GUIDE.md) for workflows and validatio
 
 ## Community and development
 
+- [Browser dashboard](web/index.html) and [browser guide](web/README.md)
 - [Roadmap](docs/ROADMAP.md) and [changelog](CHANGELOG.md)
 - [Open issues and feature requests](https://github.com/Lucoroco/stageledger/issues)
 - [Contributing instructions](CONTRIBUTING.md)

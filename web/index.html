@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102c38">
+  <meta name="description" content="StageLedger: local-first event equipment planning and reservation auditing.">
+  <title>StageLedger — Equipment operations</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="engine.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand"><span class="mark" aria-hidden="true">S<span>.</span></span><div>STAGELEDGER<small>FIELD OPERATIONS</small></div></div>
+    <div class="sidebar-heading">WORKSPACE</div>
+    <nav aria-label="Main navigation" class="nav">
+      <button type="button" class="nav-link active" data-screen="overview" aria-current="page"><span aria-hidden="true">◫</span> Overview</button>
+      <button type="button" class="nav-link" data-screen="inventory"><span aria-hidden="true">▦</span> Inventory</button>
+      <button type="button" class="nav-link" data-screen="events"><span aria-hidden="true">▤</span> Events & bookings</button>
+      <button type="button" class="nav-link" data-screen="reports"><span aria-hidden="true">▧</span> Reports & exports</button>
+      <button type="button" class="nav-link" data-screen="help"><span aria-hidden="true">◈</span> Help & privacy</button>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-note"><span class="online-dot"></span> Works offline<small>All data stays in your browser until you export it.</small></div>
+    <a class="source-link" href="https://github.com/Lucoroco/stageledger" target="_blank" rel="noopener noreferrer">↗ Open-source code</a>
+  </aside>
+  <div class="body">
+    <header class="topbar">
+      <div class="crumbs">Workspace <span>/</span> <strong id="crumb-current">Overview</strong></div>
+      <div class="top-actions"><span class="demo-pill" id="data-label">DEMO DATA</span><button type="button" class="btn btn-quiet" id="reset-demo">↺ Reset demo</button></div>
+    </header>
+    <main id="main">
+      <section class="screen" id="screen-overview">
+        <div class="headline">
+          <div><div class="eyebrow">EVENT OPERATIONS / PLANNING</div><h1>Equipment, under control.</h1><p>Plan your events, keep inventory in sync, and identify booking conflicts before showtime.</p></div>
+          <button class="btn btn-primary" type="button" data-action="new-event">+ Create event</button>
+        </div>
+        <div class="summary" id="summary" aria-label="Equipment planning summary"></div>
+        <div class="section-header"><div><h2>Scheduled events</h2><p>Equipment availability across your current bookings</p></div><button type="button" class="btn btn-line" data-screen="events">View all events →</button></div>
+        <div class="event-cards" id="overview-events"></div>
+        <div class="callout"><div class="callout-icon">i</div><div><strong>A practical planning assistant — not a dispatch guarantee.</strong><p>StageLedger checks quantities and time overlaps. Always verify actual equipment condition, transport and staffing before committing to an event.</p></div></div>
+      </section>
+
+      <section class="screen" id="screen-inventory" hidden>
+        <div class="headline"><div><div class="eyebrow">CATALOGUE / STOCK</div><h1>Inventory</h1><p>Keep a simple, reusable catalogue of interchangeable equipment.</p></div><button class="btn btn-primary" type="button" data-action="new-item">+ Add equipment</button></div>
+        <div class="toolbar"><label class="search"><span aria-hidden="true">⌕</span><input id="inventory-search" type="search" placeholder="Search equipment, ID or category" aria-label="Search inventory"></label><div class="toolbar-side"><button class="btn btn-line" data-action="import-inventory">↑ Import CSV / JSON</button><button class="btn btn-line" data-action="export-inventory">↓ Export CSV</button></div></div>
+        <div class="surface table-scroll"><table><thead><tr><th>Equipment</th><th>Category</th><th>Item ID</th><th class="right">Units in stock</th><th class="right">Actions</th></tr></thead><tbody id="inventory-table"></tbody></table></div>
+        <p class="smallnote">Stock is counted by item type. For different models or incompatible equipment, use separate IDs. The CSV format can be edited in Excel.</p>
+      </section>
+
+      <section class="screen" id="screen-events" hidden>
+        <div class="headline"><div><div class="eyebrow">SCHEDULE / RESERVATIONS</div><h1>Events & bookings</h1><p>Model preparation and breakdown times, not just event doors-open hours.</p></div><button class="btn btn-primary" type="button" data-action="new-event">+ Add event</button></div>
+        <div class="toolbar"><label class="search"><span aria-hidden="true">⌕</span><input id="events-search" type="search" placeholder="Search name or event ID" aria-label="Search events"></label><div class="toolbar-side"><select id="events-filter" aria-label="Filter event status"><option value="all">All statuses</option><option value="confirmed">Confirmed</option><option value="tentative">Tentative</option><option value="cancelled">Cancelled</option></select><button class="btn btn-line" data-action="import-events">↑ Import JSON</button></div></div>
+        <div class="surface table-scroll"><table><thead><tr><th>Event</th><th>Scheduled time</th><th>Status</th><th>Equipment check</th><th class="right">Actions</th></tr></thead><tbody id="events-table"></tbody></table></div>
+        <p class="smallnote">Tentative bookings reserve equipment. Cancelled bookings are ignored. Event preparation and breakdown windows extend the reservation period.</p>
+      </section>
+
+      <section class="screen" id="screen-reports" hidden>
+        <div class="headline"><div><div class="eyebrow">OUTPUT / TEAM HANDOVER</div><h1>Reports & exports</h1><p>Download the information your crew needs — no cloud service or account required.</p></div></div>
+        <div class="report-grid">
+          <article class="report-card"><div class="report-icon">▥</div><h2>Full schedule audit</h2><p>All active events and shortages in a printable report. Crew-friendly checkboxes included.</p><button class="btn btn-primary" type="button" data-action="export-audit-html">↓ Download HTML report</button></article>
+          <article class="report-card"><div class="report-icon">⬇</div><h2>Save your project</h2><p>Export inventory and event files so your edits can be restored or shared privately.</p><div class="stack-btn"><button class="btn btn-line" type="button" data-action="export-inventory-json">↓ Inventory JSON</button><button class="btn btn-line" type="button" data-action="export-events-json">↓ Events JSON</button></div></article>
+        </div>
+        <div class="section-header"><div><h2>Individual packing lists</h2><p>Choose an active event to download its checklist</p></div></div>
+        <div class="surface" id="report-events"></div>
+      </section>
+
+      <section class="screen" id="screen-help" hidden>
+        <div class="headline"><div><div class="eyebrow">SUPPORT / TRUST</div><h1>Built to stay simple.</h1><p>A transparent, open-source planning tool for community event organisers.</p></div></div>
+        <div class="help-grid">
+          <article class="help-card"><h2>① Start with your equipment</h2><p>Add items manually or import an inventory CSV. Quantity represents the number of interchangeable units in stock.</p></article>
+          <article class="help-card"><h2>② Create your event schedule</h2><p>Add event times, setup and teardown buffers, and the equipment quantity required for each event.</p></article>
+          <article class="help-card"><h2>③ Inspect availability</h2><p>StageLedger calculates the maximum simultaneous reservations and flags items that cannot cover an event.</p></article>
+          <article class="help-card"><h2>④ Export your work</h2><p>Save your inventory, event schedule and printable packing lists before closing the tab. Changes are not automatically stored.</p></article>
+        </div>
+        <div class="surface privacy"><h2>Privacy by design</h2><p>This interface runs entirely inside your browser. No sign-in, external scripts, analytics or web API requests are required. Your files are parsed locally. Because edits are not automatically saved, export your JSON files to retain them.</p><p><strong>Limits:</strong> pooled equipment counts only; no serial-number tracking, physical condition checks, travel estimates, crew scheduling or supplier booking. Publicly shared examples are fictional and do not prove external adoption.</p><a href="https://github.com/Lucoroco/stageledger/issues" target="_blank" rel="noopener noreferrer">Open an issue or share independent feedback ↗</a></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<input type="file" id="import-file" accept=".csv,.json,text/csv,application/json" hidden aria-label="Import data file">
+
+<dialog id="item-dialog" aria-labelledby="item-dialog-title">
+  <form id="item-form" class="modal">
+    <div class="modal-head"><div class="eyebrow">INVENTORY ITEM</div><h2 id="item-dialog-title">Add equipment</h2><button type="button" class="cross" data-close="item-dialog" aria-label="Close">×</button></div>
+    <input type="hidden" name="original_id">
+    <div class="form-grid"><label>Equipment ID<input name="id" required placeholder="e.g. pa-speaker" maxlength="100"></label><label>Available units<input name="quantity" required type="number" min="0" max="999999" step="1"></label><label class="wide">Equipment name<input name="name" required placeholder="e.g. Active PA speaker" maxlength="180"></label><label class="wide">Category<input name="category" placeholder="e.g. Audio, Lighting, Cables" maxlength="100"></label></div>
+    <div class="modal-actions"><button type="button" class="btn btn-line" data-close="item-dialog">Cancel</button><button type="submit" class="btn btn-primary">Save equipment</button></div>
+  </form>
+</dialog>
+
+<dialog id="event-dialog" aria-labelledby="event-dialog-title">
+  <form id="event-form" class="modal modal-wide">
+    <div class="modal-head"><div class="eyebrow">EVENT RESERVATION</div><h2 id="event-dialog-title">Create event</h2><button type="button" class="cross" data-close="event-dialog" aria-label="Close">×</button></div>
+    <input type="hidden" name="original_id">
+    <div class="form-grid"><label>Event ID<input name="id" required placeholder="e.g. spring-gala" maxlength="100"></label><label>Booking status<select name="status"><option value="confirmed">Confirmed</option><option value="tentative">Tentative</option><option value="cancelled">Cancelled</option></select></label><label class="wide">Event name<input name="title" required placeholder="e.g. Community concert" maxlength="180"></label><label>Event starts (local time)<input name="start" type="datetime-local" required></label><label>Event ends (local time)<input name="end" type="datetime-local" required></label><label>Setup buffer (minutes)<input name="setup" type="number" min="0" max="43200" step="1" value="0"></label><label>Teardown buffer (minutes)<input name="teardown" type="number" min="0" max="43200" step="1" value="0"></label></div>
+    <div class="modal-section-head"><h3>Equipment requirements</h3><button type="button" class="btn btn-line" id="add-requirement">+ Add item</button></div>
+    <div id="requirements-list" class="requirements-list"></div>
+    <p class="smallnote">Times entered here are interpreted in your device's local timezone, then stored with an explicit UTC offset (Z). This matters when teams work across timezones.</p>
+    <div class="modal-actions"><button type="button" class="btn btn-line" data-close="event-dialog">Cancel</button><button type="submit" class="btn btn-primary">Save event</button></div>
+  </form>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

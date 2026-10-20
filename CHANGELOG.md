@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0 — 2026-10-20
+
+- Introduced a graphical, responsive and **offline browser dashboard**, usable without Python commands.
+- Added form-based inventory and booking management, live shortage summaries, search/filtering and HTML packing exports.
+- Added browser-side CSV inventory import/export and JSON data backups, with no automatic storage or external API calls.
+- Added native Node.js calculation tests and Python/JavaScript parity checks in GitHub Actions.
+- Updated accessibility, local privacy instructions and honest evidence documentation.
+
+
 ## 0.3.0 — 2026-10-20
 
 - Import event schedules directly from CSV files exported from Excel or Google Sheets.
