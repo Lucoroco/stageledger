@@ -1,2 +1,2 @@
 """StageLedger: offline equipment planning and reservation audit."""
-__version__ = "0.3.0"
+__version__ = "0.4.0"
