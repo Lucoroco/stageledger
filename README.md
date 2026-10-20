@@ -1,5 +1,7 @@
 # StageLedger
 
+[![Python tests](https://github.com/Lucoroco/stageledger/actions/workflows/tests.yml/badge.svg)](https://github.com/Lucoroco/stageledger/actions/workflows/tests.yml)
+
 **Open-source equipment planning for community events, student societies and small AV teams.**
 
 StageLedger takes a shared equipment inventory and scheduled event requirements, then produces a packing checklist and flags equipment shortages caused by overlapping bookings. No accounts, cloud subscriptions or external Python dependencies are required.
