@@ -1,2 +1,2 @@
-"""StageLedger: event equipment planning, using only Python's standard library."""
-__version__ = "0.1.0"
+"""StageLedger: offline equipment planning and reservation audit."""
+__version__ = "0.2.0"
