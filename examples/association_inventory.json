@@ -1,0 +1,46 @@
+{
+  "items": [
+    {
+      "id": "pa-top",
+      "name": "Active PA top (15 inch)",
+      "quantity": 4,
+      "category": "Sound"
+    },
+    {
+      "id": "pa-sub",
+      "name": "Active subwoofer (18 inch)",
+      "quantity": 2,
+      "category": "Sound"
+    },
+    {
+      "id": "wireless-mic",
+      "name": "Wireless handheld microphone",
+      "quantity": 4,
+      "category": "Microphones"
+    },
+    {
+      "id": "speaker-stand",
+      "name": "Speaker tripod stand",
+      "quantity": 4,
+      "category": "Rigging"
+    },
+    {
+      "id": "led-par",
+      "name": "LED PAR fixture",
+      "quantity": 12,
+      "category": "Lighting"
+    },
+    {
+      "id": "dmx-cable",
+      "name": "DMX cable (5 m)",
+      "quantity": 16,
+      "category": "Cables"
+    },
+    {
+      "id": "xlr-cable",
+      "name": "XLR cable (10 m)",
+      "quantity": 20,
+      "category": "Cables"
+    }
+  ]
+}

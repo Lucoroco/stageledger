@@ -1,0 +1,5 @@
+id,name,quantity,category
+speaker,Main PA speaker,4,Audio
+microphone,Handheld microphone,6,Audio
+ledbar,LED light bar,8,Lighting
+stand,Speaker stand,4,Rigging

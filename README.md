@@ -2,64 +2,116 @@
 
 [![Python tests](https://github.com/Lucoroco/stageledger/actions/workflows/tests.yml/badge.svg)](https://github.com/Lucoroco/stageledger/actions/workflows/tests.yml)
 
-**Open-source equipment planning for community events, student societies and small AV teams.**
+**Open-source equipment booking and event packing for associations, student societies and small AV teams.**
 
-StageLedger takes a shared equipment inventory and scheduled event requirements, then produces a packing checklist and flags equipment shortages caused by overlapping bookings. No accounts, cloud subscriptions or external Python dependencies are required.
+StageLedger coordinates speakers, microphones, lighting and cables across overlapping events. It validates local data, flags equipment shortages and exports printable checklists — **offline**, without accounts, a server, telemetry or paid dependencies.
 
-> **Status:** early working prototype (v0.1.0). Contributions and real-world feedback are welcome. No adoption or download statistics are claimed.
-
-## Why this project exists
-
-Small volunteer-led events often coordinate speakers, microphones, stands and lighting using messages or spreadsheets. StageLedger provides a reproducible, human-readable checklist and a simple way to spot booking collisions before an event starts.
+> **Status:** v0.2 development prototype. Source and tests are public; independent users, downloads and third-party contributors are **not yet verified**. The association examples are fictional demos.
 
 ## Features
 
-- Validate equipment inventories and upcoming event requirements
-- Detect booking collisions using timezone-aware date and time ranges
-- Correctly handle back-to-back events (no false overlap)
-- Generate Markdown packing checklists, JSON plans or CSV tables
-- Audit every scheduled event in one command
-- Runs offline with Python 3.10+, using only the standard library
+| Feature | Benefit |
+| --- | --- |
+| Equipment inventory | Track pooled quantities by item type |
+| CSV and JSON input | Export equipment from a spreadsheet or use JSON |
+| Booking conflicts | Compare peak simultaneous demand across events |
+| Setup and teardown | Reserve items before and after each event |
+| Booking statuses | Confirmed, tentative and cancelled events |
+| Packing lists | Markdown, JSON, CSV and offline printable HTML |
+| Schedule audit | Analyse all non-cancelled events at once |
+| Validation | Clear errors for duplicate IDs, quantities and timestamps |
 
-## Quick start
+## Quick start (Python 3.10+)
 
-Clone the repository, then run from the repository directory:
+[Download ZIP](https://github.com/Lucoroco/stageledger/archive/refs/heads/main.zip), extract it and open a terminal in the project directory. Alternatively clone the repository.
 
-    python -m stageledger plan --inventory examples/inventory.json --events examples/events.json --event community-concert
+Generate an equipment checklist:
 
-For CSV export:
+```bash
+python -m stageledger plan --inventory examples/inventory.csv --events examples/events.json --event community-concert --format html --output packing.html
+```
 
-    python -m stageledger plan --inventory examples/inventory.json --events examples/events.json --event community-concert --format csv --output packing.csv
+Open `packing.html` in your browser. You can **Print / Save PDF** to give a list to your crew. The sample intentionally has an equipment shortage: exit code `2` is expected.
 
-Audit every scheduled event:
+Audit a richer, fictional association scenario:
 
-    python -m stageledger audit --inventory examples/inventory.json --events examples/events.json
+```bash
+python -m stageledger audit --inventory examples/association_inventory.json --events examples/association_events.json --format html --output audit.html
+```
 
-Install the command-line tool locally (optional):
+For Windows, see the [PowerShell quick start](docs/QUICKSTART_WINDOWS.md). Optional command-line installation:
 
-    python -m pip install -e .
-    stageledger --help
+```bash
+python -m pip install -e .
+stageledger --help
+```
 
-**Exit codes:** `0` = plan ready, `1` = invalid input/file error, `2` = shortages present.
+## Data example
 
-## JSON format
+Inventory can be provided as CSV:
 
-See `examples/inventory.json` and `examples/events.json`. IDs must be unique; inventory quantities are non-negative integers and requirement quantities are positive integers. Timestamps must use ISO 8601 with a timezone.
+```csv
+id,name,quantity,category
+pa-top,Active PA top,4,Audio
+wireless-mic,Wireless microphone,4,Microphones
+```
 
-Time intervals are half-open `[start, end)`: back-to-back bookings are not counted as overlapping.
+Schedule events in a JSON file:
 
-The shortage check uses **peak simultaneous demand** from other events; it does not naively sum events which overlap the target at different times.
+```json
+{
+  "events": [{
+    "id": "campus-talk",
+    "title": "Campus talk",
+    "status": "confirmed",
+    "start": "2026-11-21T18:00:00+00:00",
+    "end": "2026-11-21T20:00:00+00:00",
+    "setup_minutes": 60,
+    "teardown_minutes": 30,
+    "requirements": [
+      {"item_id": "pa-top", "quantity": 2},
+      {"item_id": "wireless-mic", "quantity": 1}
+    ]
+  }]
+}
+```
 
-## Tests
+The speaker stock for this event is reserved **17:00–20:30 UTC**, including preparation. Other events competing in that interval reduce availability.
 
-    python -m unittest discover -s tests -v
+## CLI commands
 
-## Limitations and roadmap
+| Command or argument | Purpose |
+| --- | --- |
+| `python -m stageledger plan --inventory FILE --events FILE --event ID` | Packing plan for one event |
+| `python -m stageledger audit --inventory FILE --events FILE` | All active-event shortages |
+| `--format html --output FILE` | Offline print-friendly report |
+| `--format csv` | Single-event spreadsheet output |
+| `--format json` | Structured report for other tools |
+| `--format markdown` | Markdown packing checklist |
+| `python -m unittest discover -s tests -v` | Run all tests |
 
-This first version is deliberately offline. It does not track transport time, setup/teardown, broken equipment, individual serial numbers or staff. Include preparation and transport buffers explicitly in the booking windows.
+**Exit codes:** `0` = enough equipment; `1` = invalid input or file error; `2` = one or more shortages.
 
-Potential future features (not implemented): CSV import, reusable equipment presets, browser UI and individual asset reservations.
+**Booking policy:** `tentative` bookings reserve inventory until cancelled; cancelled events are excluded. Dates must be timezone-aware ISO 8601. Intervals are half-open: adjacent bookings don't overlap unless their buffers do. Availability uses **peak simultaneous demand** (not a sum of disjoint competing bookings).
 
-## Contributing / license
+## Known limitations
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and [LICENSE](LICENSE). Avoid including real attendee personal data in public examples.
+- Quantities are pooled per item type, not tracked by serial number.
+- Equipment condition, staff, travel routing, supplier orders and deposits are not managed.
+- Transport time needs to be included in setup/teardown buffers.
+- HTML reports are local exports, not a hosted booking service.
+- Do not expose personal information or real client schedules in public GitHub issues.
+
+See the [operations guide](docs/OPERATIONS_GUIDE.md) for workflows and validation details.
+
+## Community and development
+
+- [Roadmap](docs/ROADMAP.md) and [changelog](CHANGELOG.md)
+- [Open issues and feature requests](https://github.com/Lucoroco/stageledger/issues)
+- [Contributing instructions](CONTRIBUTING.md)
+- [Security guidance](SECURITY.md) · [Code of conduct](CODE_OF_CONDUCT.md)
+- [Evidence and impact record](docs/VALIDATION_AND_IMPACT.md)
+
+Real, independently tested feedback is welcome. We do not claim adoption, external contributors or registry downloads without proof. Development has included AI assistance, as disclosed in the evidence record.
+
+**Licence:** MIT.

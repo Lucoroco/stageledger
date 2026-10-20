@@ -1,21 +1,28 @@
 # StageLedger roadmap
 
-StageLedger is a small, usable prototype, not a complete booking management platform.
+StageLedger is an offline, volunteer-oriented equipment planning prototype. This document distinguishes existing functionality from potential improvements.
 
-## Near-term priorities
+## Implemented in v0.2
 
-1. Collect feedback from one independent volunteer-run event or student society.
-2. Add optional setup and teardown buffers before availability calculations.
-3. Add import validation for CSV inventory data.
-4. Improve documentation for Windows and troubleshooting.
-5. Add tests for simultaneous boundary events, zero stock and malformed input.
+- Inventory in JSON or CSV with strict validation
+- Conflict checking across overlapping reservations, including setup and teardown
+- Confirmed, tentative and cancelled bookings
+- Print-friendly HTML, Markdown, JSON and CSV packing reports
+- CI-tested Python command-line interface and realistic **fictional** sample scenarios
 
-## Future ideas (not yet implemented)
+## Next priorities
 
-- Visual calendar showing competing equipment bookings
-- Reusable kit templates
-- Printable PDFs for packing teams
-- Optional individual asset tracking
-- Translation of instructions for volunteer teams
+1. Test the application with **independent** event organisers and collect reproducible feedback with consent.
+2. Extend the tool to individual serialized equipment assets and condition tracking.
+3. Allow configurable logistics/transport delays between venues.
+4. Add inventory CSV export and easy event authoring from spreadsheet data.
+5. Improve accessibility of generated reports and the English/French documentation.
+6. Consider a no-account local user interface if organisers confirm it is useful.
 
-Contributions are welcome: open a GitHub issue before implementing major changes to agree on expected behaviour.
+## Out of scope for the current prototype
+
+- Staff payroll, billing and client CRM
+- Guaranteed dispatch availability or complex routing
+- Automatically verified physical inventory
+
+Read [the evidence record](VALIDATION_AND_IMPACT.md). Example data are demonstrations, **not proof of customer adoption**. Open an issue to discuss substantial changes before implementing them.

@@ -6,6 +6,15 @@ import json
 import sys
 
 from stageledger.core import InputError, audit, build_plan, load_events, load_inventory
+from stageledger.reporting import render_html
+
+
+def _csv_safe(value):
+    """Prevent spreadsheet programs from interpreting user-supplied cells as formulas."""
+    text = str(value)
+    if text.lstrip().startswith(("=", "+", "-", "@")) or text.startswith(("\t", "\r", "\n")):
+        return "'" + text
+    return text
 
 
 def as_markdown(plan):
@@ -14,6 +23,8 @@ def as_markdown(plan):
         f"# Packing list: {plan['title']}", "",
         f"- Event ID: `{plan['event']}`",
         f"- Start: {plan['start']}", f"- End: {plan['end']}",
+        f"- Equipment reservation: {plan['booking_start']} → {plan['booking_end']}",
+        f"- Booking: {plan['status']} (setup {plan['setup_minutes']} min, teardown {plan['teardown_minutes']} min)",
         f"- Status: **{status}**", "",
         "| Packed | Equipment | Needed | Available | Missing |",
         "| --- | --- | ---: | ---: | ---: |",
@@ -26,7 +37,11 @@ def as_markdown(plan):
         )
     if not plan["items"]:
         lines += ["", "No equipment required for this event."]
-    lines += ["", "_Availability accounts for peak overlapping event bookings._", ""]
+    lines += ["", "_Availability accounts for peak overlapping equipment reservations including setup/teardown buffers. Tentative bookings reserve equipment; cancelled bookings do not._", ""]
+    for item in plan["items"]:
+        if item["overlapping_events"]:
+            lines.append(f"- {item['id']}: overlapping events — {', '.join(item['overlapping_events'])}")
+    lines.append("")
     return "\n".join(lines)
 
 
@@ -36,7 +51,7 @@ def as_csv(plan):
     writer.writerow(["event_id", "item_id", "name", "requested", "available", "shortage"])
     for item in plan["items"]:
         writer.writerow([
-            plan["event"], item["id"], item["name"], item["requested"],
+            _csv_safe(plan["event"]), _csv_safe(item["id"]), _csv_safe(item["name"]), item["requested"],
             item["available"], item["shortage"],
         ])
     return buffer.getvalue()
@@ -51,8 +66,8 @@ def main(argv=None):
         cmd.add_argument("--events", required=True, help="Path to events JSON")
         cmd.add_argument("--output", help="Write output to a file instead of stdout")
         cmd.add_argument(
-            "--format", choices=["markdown", "json", "csv"] if command == "plan"
-            else ["json", "markdown"], default="markdown" if command == "plan" else "json"
+            "--format", choices=["markdown", "json", "csv", "html"] if command == "plan"
+            else ["json", "markdown", "html"], default="markdown" if command == "plan" else "json"
         )
         if command == "plan":
             cmd.add_argument("--event", required=True, help="ID of the event to plan")
@@ -66,6 +81,7 @@ def main(argv=None):
                 "markdown": lambda: as_markdown(plan),
                 "json": lambda: json.dumps(plan, indent=2) + "\n",
                 "csv": lambda: as_csv(plan),
+                "html": lambda: render_html([plan]),
             }[args.format]()
             failed = not plan["ready"]
         else:
@@ -73,6 +89,7 @@ def main(argv=None):
             output = (
                 json.dumps(plans, indent=2) + "\n"
                 if args.format == "json"
+                else render_html(plans) if args.format == "html"
                 else "\n".join(as_markdown(p) for p in plans)
             )
             failed = any(not plan["ready"] for plan in plans)
