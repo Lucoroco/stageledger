@@ -1,0 +1,75 @@
+{
+  "events": [
+    {
+      "id": "student-gala",
+      "title": "Student association gala (fictional demo)",
+      "status": "confirmed",
+      "start": "2026-11-21T18:00:00+00:00",
+      "end": "2026-11-22T01:00:00+00:00",
+      "setup_minutes": 120,
+      "teardown_minutes": 90,
+      "requirements": [
+        {
+          "item_id": "pa-top",
+          "quantity": 2
+        },
+        {
+          "item_id": "pa-sub",
+          "quantity": 2
+        },
+        {
+          "item_id": "wireless-mic",
+          "quantity": 2
+        },
+        {
+          "item_id": "led-par",
+          "quantity": 10
+        },
+        {
+          "item_id": "xlr-cable",
+          "quantity": 8
+        }
+      ]
+    },
+    {
+      "id": "community-talk",
+      "title": "Community talk (fictional demo)",
+      "status": "tentative",
+      "start": "2026-11-21T15:00:00+00:00",
+      "end": "2026-11-21T18:00:00+00:00",
+      "setup_minutes": 60,
+      "teardown_minutes": 60,
+      "requirements": [
+        {
+          "item_id": "pa-top",
+          "quantity": 3
+        },
+        {
+          "item_id": "wireless-mic",
+          "quantity": 3
+        },
+        {
+          "item_id": "speaker-stand",
+          "quantity": 2
+        },
+        {
+          "item_id": "xlr-cable",
+          "quantity": 8
+        }
+      ]
+    },
+    {
+      "id": "cancelled-rehearsal",
+      "title": "Cancelled rehearsal (fictional demo)",
+      "status": "cancelled",
+      "start": "2026-11-21T16:00:00+00:00",
+      "end": "2026-11-21T20:00:00+00:00",
+      "requirements": [
+        {
+          "item_id": "pa-sub",
+          "quantity": 2
+        }
+      ]
+    }
+  ]
+}
